@@ -3,6 +3,7 @@ from random import random
 from funkload.FunkLoadTestCase import FunkLoadTestCase
 from funkload.utils import extract_token
 from funkload.Lipsum import Lipsum
+from webunit.utility import Upload
 
 class test_upvid(FunkLoadTestCase):
     def setUp(self):
@@ -41,6 +42,26 @@ class test_upvid(FunkLoadTestCase):
             ['commit', 'Sign in']],
             description="Login")       
 
+
+
+
+    def test_video_upload(self):
+        server_url = self.server_url
+        self.test_user_login()
+        self.get(server_url + "/videos/new", description="View the user signin page")
+        auth_token = extract_token(self.getBody(), 'name="authenticity_token" type="hidden" value="', '"')
+        nb_time = self.conf_getInt("test_video_upload", 'nb_time')
+        for i in range(nb_time):
+            self.post(server_url + "/videos",
+                params=[['authenticity_token', auth_token],
+                        ['video[category]', Lipsum().getWord()],
+                        ['upload[file]',  Upload("./vids/1.mp4")],
+                        ['video[title]', Lipsum().getWord()]],
+                        description = "upload video"
+                    )
+
+
+
     def test_index(self):
         # The description should be set in the configuration file
         server_url = self.server_url
@@ -69,3 +90,4 @@ class test_upvid(FunkLoadTestCase):
 
 if __name__ in ('main', '__main__'):
     unittest.main()
+    #print Upload("./vids/1.mp4")
