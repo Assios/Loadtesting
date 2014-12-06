@@ -52,7 +52,7 @@ class test_upvid(FunkLoadTestCase):
             self.post(server_url + "/videos",
                 params=[['authenticity_token', auth_token],
                         ['video[category]', Lipsum().getWord()],
-                        ['upload[file]',  Upload("./vids/1.mp4")],
+                        ['video[videofile]',  Upload("./vids/1.mp4")],
                         ['video[title]', Lipsum().getWord()]],
                         description = "upload video"
                     )
