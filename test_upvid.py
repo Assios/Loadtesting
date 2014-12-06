@@ -72,7 +72,6 @@ class test_upvid(FunkLoadTestCase):
                         description = "comment"
                 )
 
-
     def test_index(self):
         # The description should be set in the configuration file
         server_url = self.server_url
@@ -98,6 +97,63 @@ class test_upvid(FunkLoadTestCase):
         nb_time = self.conf_getInt("test_show_comments", 'nb_time')
         for i in range(nb_time):
             self.get(server_url + "/comments", description="Get comments") 
+
+    def test_critical_path(self):
+        server_url = self.server_url
+        nb_time = self.conf_getInt('test_critical_path', 'nb_time')
+
+        #Test index
+        for i in range(nb_time):
+            self.get(server_url, description='Get URL')
+
+        #Test user signup
+        self.get(server_url, description='Get root URL')
+        self.get(server_url + "/users/sign_up", description="View the user signup page")
+
+        auth_token = extract_token(self.getBody(), 'name="authenticity_token" type="hidden" value="', '"')
+        email = Lipsum().getUniqWord() + "@" + Lipsum().getWord() + ".com"
+
+        self.post(self.server_url + "/users",
+            params=[['user[email]', email],
+            ['user[password]', 'a'],
+            ['user[password_confirmation]', 'a'],
+            ['authenticity_token', auth_token],
+            ['commit', 'Sign up']],
+            description="Create New User")
+
+        #Test user login
+        email = "a@a.com"
+        password = "a"
+
+        self.post(self.server_url + "/users/sign_in",
+            params=[['user[email]', email],
+            ['user[password]', password],
+            ['authenticity_token', auth_token],
+            ['commit', 'Sign in']],
+            description="Login")  
+
+        #Test show user
+        for i in range(nb_time):
+            self.get(server_url + "/users/1", description="Get user")
+
+        #Test show video
+        for i in range(nb_time):
+            self.get(server_url + "/videos/1", description="Get video")
+
+        #Test post comments
+        self.test_user_login()
+        self.get(server_url + "/comments/new", description="View the comments")
+        auth_token = extract_token(self.getBody(), 'name="authenticity_token" type="hidden" value="', '"')
+        nb_time = self.conf_getInt("test_comment", 'nb_time')
+        for i in range(nb_time):
+            self.post(server_url + "/comments",
+                params=[['authenticity_token', auth_token],
+                        ['comment[message]', Lipsum().getWord()],
+                        ['comment[video_id]', 1]],
+                        description = "comment"
+                )
+
+
 
 if __name__ in ('main', '__main__'):
     unittest.main()
