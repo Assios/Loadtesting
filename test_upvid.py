@@ -40,9 +40,7 @@ class test_upvid(FunkLoadTestCase):
             ['user[password]', password],
             ['authenticity_token', auth_token],
             ['commit', 'Sign in']],
-            description="Login")       
-
-
+            description="Login")      
 
 
     def test_video_upload(self):
@@ -60,6 +58,19 @@ class test_upvid(FunkLoadTestCase):
                         description = "upload video"
                     )
 
+    def test_comment(self):
+        server_url = self.server_url
+        self.test_user_login()
+        self.get(server_url + "/comments/new", description="View the comments")
+        auth_token = extract_token(self.getBody(), 'name="authenticity_token" type="hidden" value="', '"')
+        nb_time = self.conf_getInt("test_comment", 'nb_time')
+        for i in range(nb_time):
+            self.post(server_url + "/comments",
+                params=[['authenticity_token', auth_token],
+                        ['comment[message]', Lipsum().getWord()],
+                        ['comment[video_id]', 1]],
+                        description = "comment"
+                )
 
 
     def test_index(self):
@@ -74,13 +85,13 @@ class test_upvid(FunkLoadTestCase):
         server_url = self.server_url
         nb_time = self.conf_getInt("test_show_video", 'nb_time')
         for i in range(nb_time):
-            self.get(server_url + "/videos/2", description="Get video")
+            self.get(server_url + "/videos/1", description="Get video")
         # end test ---
     def test_show_user(self):
         server_url = self.server_url
         nb_time = self.conf_getInt("test_show_user", 'nb_time')
         for i in range(nb_time):
-            self.get(server_url + "/users/2", description="Get user")
+            self.get(server_url + "/users/1", description="Get user")
         # end test ---
     def test_show_comments(self):
         server_url = self.server_url
