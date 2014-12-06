@@ -42,7 +42,6 @@ class test_upvid(FunkLoadTestCase):
             ['commit', 'Sign in']],
             description="Login")      
 
-
     def test_video_upload(self):
         server_url = self.server_url
         self.test_user_login()
@@ -130,7 +129,9 @@ class test_upvid(FunkLoadTestCase):
             ['user[password]', password],
             ['authenticity_token', auth_token],
             ['commit', 'Sign in']],
-            description="Login")  
+            description="Login") 
+
+        self.test_video_upload()
 
         #Test show user
         for i in range(nb_time):
@@ -152,8 +153,6 @@ class test_upvid(FunkLoadTestCase):
                         ['comment[video_id]', 1]],
                         description = "comment"
                 )
-
-
 
 if __name__ in ('main', '__main__'):
     unittest.main()
