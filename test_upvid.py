@@ -105,6 +105,10 @@ class test_upvid(FunkLoadTestCase):
         for i in range(nb_time):
             self.get(server_url, description='Get URL')
 
+        #Test user login
+        email = "a@a.com"
+        password = "a"
+
         #Test user signup
         self.get(server_url, description='Get root URL')
         self.get(server_url + "/users/sign_up", description="View the user signup page")
@@ -120,10 +124,6 @@ class test_upvid(FunkLoadTestCase):
             ['commit', 'Sign up']],
             description="Create New User")
 
-        #Test user login
-        email = "a@a.com"
-        password = "a"
-
         self.post(self.server_url + "/users/sign_in",
             params=[['user[email]', email],
             ['user[password]', password],
@@ -131,7 +131,17 @@ class test_upvid(FunkLoadTestCase):
             ['commit', 'Sign in']],
             description="Login") 
 
-        self.test_video_upload()
+        #Test upload video
+        self.get(server_url + "/videos/new", description="View the user signin page")
+        auth_token = extract_token(self.getBody(), 'name="authenticity_token" type="hidden" value="', '"')
+        for i in range(nb_time):
+            self.post(server_url + "/videos",
+                params=[['authenticity_token', auth_token],
+                        ['video[category]', Lipsum().getWord()],
+                        ['video[videofile]',  Upload("./vids/1.mp4")],
+                        ['video[title]', Lipsum().getWord()]],
+                        description = "upload video"
+                    )
 
         #Test show user
         for i in range(nb_time):
@@ -145,7 +155,6 @@ class test_upvid(FunkLoadTestCase):
         self.test_user_login()
         self.get(server_url + "/comments/new", description="View the comments")
         auth_token = extract_token(self.getBody(), 'name="authenticity_token" type="hidden" value="', '"')
-        nb_time = self.conf_getInt("test_comment", 'nb_time')
         for i in range(nb_time):
             self.post(server_url + "/comments",
                 params=[['authenticity_token', auth_token],
