@@ -101,67 +101,17 @@ class test_upvid(FunkLoadTestCase):
         server_url = self.server_url
         nb_time = self.conf_getInt('test_critical_path', 'nb_time')
 
-        #Test index
-        for i in range(nb_time):
-            self.get(server_url, description='Get URL')
+        self.test_index()
 
-        #Test user login
-        email = "a@a.com"
-        password = "a"
+        self.test_user_signup()
 
-        #Test user signup
-        self.get(server_url, description='Get root URL')
-        self.get(server_url + "/users/sign_up", description="View the user signup page")
+        self.test_video_upload()
 
-        auth_token = extract_token(self.getBody(), 'name="authenticity_token" type="hidden" value="', '"')
-        email = Lipsum().getUniqWord() + "@" + Lipsum().getWord() + ".com"
+        self.test_show_user()
 
-        self.post(self.server_url + "/users",
-            params=[['user[email]', email],
-            ['user[password]', 'a'],
-            ['user[password_confirmation]', 'a'],
-            ['authenticity_token', auth_token],
-            ['commit', 'Sign up']],
-            description="Create New User")
+        self.test_show_video()
 
-        self.post(self.server_url + "/users/sign_in",
-            params=[['user[email]', email],
-            ['user[password]', password],
-            ['authenticity_token', auth_token],
-            ['commit', 'Sign in']],
-            description="Login") 
-
-        #Test upload video
-        self.get(server_url + "/videos/new", description="View the user signin page")
-        auth_token = extract_token(self.getBody(), 'name="authenticity_token" type="hidden" value="', '"')
-        for i in range(nb_time):
-            self.post(server_url + "/videos",
-                params=[['authenticity_token', auth_token],
-                        ['video[category]', Lipsum().getWord()],
-                        ['video[videofile]',  Upload("./vids/1.mp4")],
-                        ['video[title]', Lipsum().getWord()]],
-                        description = "upload video"
-                    )
-
-        #Test show user
-        for i in range(nb_time):
-            self.get(server_url + "/users/1", description="Get user")
-
-        #Test show video
-        for i in range(nb_time):
-            self.get(server_url + "/videos/1", description="Get video")
-
-        #Test post comments
-        self.test_user_login()
-        self.get(server_url + "/comments/new", description="View the comments")
-        auth_token = extract_token(self.getBody(), 'name="authenticity_token" type="hidden" value="', '"')
-        for i in range(nb_time):
-            self.post(server_url + "/comments",
-                params=[['authenticity_token', auth_token],
-                        ['comment[message]', Lipsum().getWord()],
-                        ['comment[video_id]', 1]],
-                        description = "comment"
-                )
+        self.test_comment()
 
 if __name__ in ('main', '__main__'):
     unittest.main()
