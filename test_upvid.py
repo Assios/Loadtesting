@@ -42,6 +42,7 @@ class test_upvid(FunkLoadTestCase):
             ['commit', 'Sign in']],
             description="Login")      
 
+
     def test_video_upload(self):
         server_url = self.server_url
         self.test_user_login()
@@ -52,10 +53,11 @@ class test_upvid(FunkLoadTestCase):
             self.post(server_url + "/videos",
                 params=[['authenticity_token', auth_token],
                         ['video[category]', Lipsum().getWord()],
-                        ['video[videofile]',  Upload("./vids/1.mp4")],
+                        ['video[local_videofile]',  Upload("./vids/1.mp4")],
                         ['video[title]', Lipsum().getWord()]],
                         description = "upload video"
                     )
+
 
     def test_comment(self):
         server_url = self.server_url
@@ -104,8 +106,6 @@ class test_upvid(FunkLoadTestCase):
         self.test_index()
 
         self.test_user_signup()
-
-        self.test_video_upload()
 
         self.test_show_user()
 
